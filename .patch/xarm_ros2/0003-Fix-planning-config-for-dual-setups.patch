@@ -1,0 +1,41 @@
+From 6e7c1039f39ad9f1939abb534ec0cf12ef735b47 Mon Sep 17 00:00:00 2001
+From: Scott Ware <scott.r.ware@intel.com>
+Date: Wed, 26 Mar 2025 14:01:59 +0000
+Subject: [PATCH 3/3] Fix planning config for dual setups
+
+Signed-off-by: Scott Ware <scott.r.ware@intel.com>
+---
+ uf_ros_lib/uf_ros_lib/moveit_configs_builder.py | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
+index 2468f30..c54ca24 100644
+--- a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
++++ b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
+@@ -1502,8 +1502,9 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+                 planning_yaml_2 = {}
+                 if pipeline in pipelines_1:
+                     parameter_file = config_folder_1 / filename
+-                    planning_yaml_1 = load_yaml(parameter_file)
+-                    planning_yaml_1 = planning_yaml_1 if planning_yaml_1 else {}
++                    if parameter_file.exists():
++                        planning_yaml_1 = load_yaml(parameter_file)
++                        planning_yaml_1 = planning_yaml_1 if planning_yaml_1 else {}
+                     if self.__robot_type_1 != 'lite' and self.__add_gripper_1 in ('True', 'true'):
+                         parameter_file = self._package_path / 'config' / '{}_gripper'.format(self.__robot_type_1) / filename
+                         if parameter_file.exists():
+@@ -1523,8 +1524,9 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+ 
+                 if pipeline in pipelines_2:
+                     parameter_file = config_folder_2 / filename
+-                    planning_yaml_2 = load_yaml(parameter_file)
+-                    planning_yaml_2 = planning_yaml_2 if planning_yaml_2 else {}
++                    if parameter_file.exists():
++                        planning_yaml_2 = load_yaml(parameter_file)
++                        planning_yaml_2 = planning_yaml_2 if planning_yaml_2 else {}
+                                 
+                     if self.__robot_type_2 != 'lite' and self.__add_gripper_2 in ('True', 'true'):
+                         parameter_file = self._package_path / 'config' / '{}_gripper'.format(self.__robot_type_2) / filename
+-- 
+2.43.0
+

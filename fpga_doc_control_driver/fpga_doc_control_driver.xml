@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<library path="fpga_doc_control_driver">
+  <class name="fpga_doc_control_driver/DoCSystem"
+         type="fpga_doc_control_driver::DoCSystem"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Altera FPGA Drive-on-Chip hardware plugin for ROS control.
+    </description>
+  </class>
+</library>

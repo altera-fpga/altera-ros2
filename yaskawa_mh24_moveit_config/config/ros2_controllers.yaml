@@ -1,0 +1,43 @@
+# This config file is used by ros2_control
+controller_manager:
+  ros__parameters:
+    update_rate: 60  # Hz
+
+    mh24_arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+
+    mh24_effector_controller:
+      type: position_controllers/GripperActionController
+
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+
+mh24_arm_controller:
+  ros__parameters:
+    action_monitor_rate: 20.0
+    joints:
+      - joint_s
+      - joint_l
+      - joint_u
+      - joint_r
+      - joint_b
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+mh24_effector_controller:
+  ros__parameters:
+    joint: joint_t
+
+joint_state_broadcaster:
+  ros__parameters:
+    map_interface_to_joint_state:
+      position: position
+      velocity: velocity
+    use_local_topics: false
+

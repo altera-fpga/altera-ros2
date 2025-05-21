@@ -1,0 +1,83 @@
+From 1927f6b9f615cd0bb9a4f3b506d2cb92227c9859 Mon Sep 17 00:00:00 2001
+From: Scott Ware <scott.r.ware@intel.com>
+Date: Wed, 26 Mar 2025 14:00:26 +0000
+Subject: [PATCH 2/3] Add initial position values for state interfaces
+
+Signed-off-by: Scott Ware <scott.r.ware@intel.com>
+---
+ .../urdf/lite6/lite6.ros2_control.xacro       | 24 ++++++++++++++-----
+ 1 file changed, 18 insertions(+), 6 deletions(-)
+
+diff --git a/xarm_description/urdf/lite6/lite6.ros2_control.xacro b/xarm_description/urdf/lite6/lite6.ros2_control.xacro
+index a604ddc..714312d 100755
+--- a/xarm_description/urdf/lite6/lite6.ros2_control.xacro
++++ b/xarm_description/urdf/lite6/lite6.ros2_control.xacro
+@@ -36,7 +36,9 @@
+           <param name="min">-3.14</param>
+           <param name="max">3.14</param>
+         </command_interface>
+-        <state_interface name="position"/>
++        <state_interface name="position">
++          <param name="initial_value">0.0</param>
++        </state_interface>
+         <state_interface name="velocity"/>
+         <!-- <state_interface name="effort"/> -->
+       </joint>
+@@ -49,7 +51,9 @@
+           <param name="min">-3.14</param>
+           <param name="max">3.14</param>
+         </command_interface>
+-        <state_interface name="position"/>
++        <state_interface name="position">
++          <param name="initial_value">0.174</param>
++        </state_interface>
+         <state_interface name="velocity"/>
+         <!-- <state_interface name="effort"/> -->
+       </joint>
+@@ -62,7 +66,9 @@
+           <param name="min">-3.14</param>
+           <param name="max">3.14</param>
+         </command_interface>
+-        <state_interface name="position"/>
++        <state_interface name="position">
++          <param name="initial_value">0.087</param>
++        </state_interface>
+         <state_interface name="velocity"/>
+         <!-- <state_interface name="effort"/> -->
+       </joint>
+@@ -75,7 +81,9 @@
+           <param name="min">-3.14</param>
+           <param name="max">3.14</param>
+         </command_interface>
+-        <state_interface name="position"/>
++        <state_interface name="position">
++          <param name="initial_value">-0.017</param>
++        </state_interface>
+         <state_interface name="velocity"/>
+         <!-- <state_interface name="effort"/> -->
+       </joint>
+@@ -88,7 +96,9 @@
+           <param name="min">-3.14</param>
+           <param name="max">3.14</param>
+         </command_interface>
+-        <state_interface name="position"/>
++        <state_interface name="position">
++          <param name="initial_value">-0.087</param>
++        </state_interface>
+         <state_interface name="velocity"/>
+         <!-- <state_interface name="effort"/> -->
+       </joint>
+@@ -101,7 +111,9 @@
+           <param name="min">-3.14</param>
+           <param name="max">3.14</param>
+         </command_interface>
+-        <state_interface name="position"/>
++        <state_interface name="position">
++          <param name="initial_value">0.122</param>
++        </state_interface>
+         <state_interface name="velocity"/>
+         <!-- <state_interface name="effort"/> -->
+       </joint>
+-- 
+2.43.0
+

@@ -1,0 +1,24 @@
+levels:
+  static:
+    tool:
+      bandit:
+      clang-tidy:
+      cppcheck:
+      flawfinder:
+      make:
+
+    reporting:
+      json:
+        files: "true"
+
+  lint:
+    tool:
+      cmakelint:
+      cpplint:
+      pylint:
+      xmllint:
+      yamllint:
+
+    reporting:
+      json:
+        files: "true"

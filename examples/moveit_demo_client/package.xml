@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright (C) 2025 Altera Corporation
+    SPDX-License-Identifier: Apache-2.0
+-->
+
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_demo_client</name>
+  <version>0.1.0</version>
+  <description>MoveIt2 demo client for demonstrating path planning with a robot arm.</description>
+
+  <maintainer email="scott.ware@altera.com">Scott Ware</maintainer>
+
+  <author email="scott.ware@altera.com">Scott Ware</author>
+
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>control_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>moveit_msgs</depend>
+  <depend>pluginlib</depend>
+
+  <build_depend>moveit_ros_planning</build_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

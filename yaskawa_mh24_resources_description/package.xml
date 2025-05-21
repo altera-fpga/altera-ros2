@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright (C) 2025 Altera Corporation
+    SPDX-License-Identifier: Apache-2.0
+-->
+
+<package>
+	<name>yaskawa_mh24_resources_description</name>
+	<version>0.1.0</version>
+	<license>Apache v2.0</license>
+	<maintainer email="scott.ware@altera.com">Scott Ware</maintainer>
+	<author email="scott.ware@altera.com">Scott Ware</author>
+	<author email="maarten@de-vri.es">Maarten de Vries</author>
+
+	<description>
+		<p>
+			ROS 2 support for the Yaskawa MH24.
+		</p>
+		<p>
+			This package contains configuration data and 3D models for Yaskawa MH24 manipulators.
+		</p>
+	</description>
+
+	<buildtool_depend>ament_cmake</buildtool_depend>
+
+	<export>
+		<architecture_independent/>
+        <build_type>ament_cmake</build_type>
+	</export>
+</package>

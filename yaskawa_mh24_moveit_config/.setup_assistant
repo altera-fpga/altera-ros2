@@ -1,0 +1,19 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: yaskawa_mh24_resources_description
+    relative_path: urdf/mh24.xacro
+  srdf:
+    relative_path: config/motoman_mh_24.srdf
+  package_settings:
+    author_name: Scott Ware
+    author_email: scott.ware@altera.com
+    generated_timestamp: 1694601100
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro

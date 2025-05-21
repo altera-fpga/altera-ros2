@@ -1,0 +1,261 @@
+From 67be031fc0f7151bd7dcc7fb1fd8032577aa29c1 Mon Sep 17 00:00:00 2001
+From: Scott Ware <scott.r.ware@intel.com>
+Date: Wed, 26 Mar 2025 13:59:27 +0000
+Subject: [PATCH 1/3] Allow different control plugins for dual setups
+
+Signed-off-by: Scott Ware <scott.r.ware@intel.com>
+---
+ uf_ros_lib/uf_ros_lib/moveit_configs_builder.py           | 8 ++++++--
+ xarm_controller/launch/_dual_ros2_control.launch.py       | 2 ++
+ xarm_description/urdf/dual_xarm_device.urdf.xacro         | 7 ++++---
+ .../launch/_dual_robot_beside_table_gazebo.launch.py      | 5 ++++-
+ xarm_gazebo/launch/_dual_robot_beside_table_gz.launch.py  | 5 ++++-
+ .../launch/_dual_robot_moveit_common.launch.py            | 5 ++++-
+ .../launch/_dual_robot_moveit_fake.launch.py              | 5 ++++-
+ .../launch/_dual_robot_moveit_gazebo.launch.py            | 5 ++++-
+ xarm_moveit_config/launch/_dual_robot_moveit_gz.launch.py | 5 ++++-
+ .../launch/_dual_robot_moveit_realmove.launch.py          | 5 ++++-
+ 10 files changed, 40 insertions(+), 12 deletions(-)
+
+diff --git a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
+index feed5b2..2468f30 100644
+--- a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
++++ b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
+@@ -77,7 +77,8 @@ DualMoveItConfigsBuilder(
+         limited=False
+         effort_control=False
+         velocity_control=False
+-        ros2_control_plugin='uf_robot_hardware/UFRobotSystemHardware'
++        ros2_control_plugin_1='uf_robot_hardware/UFRobotSystemHardware'
++        ros2_control_plugin_2='uf_robot_hardware/UFRobotSystemHardware'
+         add_gripper_1=False
+         add_gripper_2=False
+         add_vacuum_gripper_1=False
+@@ -892,6 +893,8 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+         kinematics_suffix_1 = get_param_str('kinematics_suffix_1', kinematics_suffix)
+         kinematics_suffix_2 = get_param_str('kinematics_suffix_2', kinematics_suffix)
+         ros2_control_plugin = get_param_str('ros2_control_plugin', 'uf_robot_hardware/UFRobotSystemHardware')
++        ros2_control_plugin_1 = get_param_str('ros2_control_plugin_1', ros2_control_plugin)
++        ros2_control_plugin_2 = get_param_str('ros2_control_plugin_2', ros2_control_plugin)
+         ros2_control_params = get_param_str('ros2_control_params', '')
+         add_gripper = get_param_str('add_gripper', False)
+         add_gripper_1 = get_param_str('add_gripper_1', add_gripper)
+@@ -983,7 +986,8 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+             'mesh_suffix': mesh_suffix,
+             'kinematics_suffix_1': kinematics_suffix_1,
+             'kinematics_suffix_2': kinematics_suffix_2,
+-            'ros2_control_plugin': ros2_control_plugin,
++            'ros2_control_plugin_1': ros2_control_plugin_1,
++            'ros2_control_plugin_2': ros2_control_plugin_2,
+             'ros2_control_params': ros2_control_params,
+             'add_gripper_1': add_gripper_1,
+             'add_gripper_2': add_gripper_2,
+diff --git a/xarm_controller/launch/_dual_ros2_control.launch.py b/xarm_controller/launch/_dual_ros2_control.launch.py
+index 7f39ad5..42cfad8 100644
+--- a/xarm_controller/launch/_dual_ros2_control.launch.py
++++ b/xarm_controller/launch/_dual_ros2_control.launch.py
+@@ -45,6 +45,8 @@ def launch_setup(context, *args, **kwargs):
+     effort_control = LaunchConfiguration('effort_control', default=False)
+     velocity_control = LaunchConfiguration('velocity_control', default=False)
+     ros2_control_plugin = LaunchConfiguration('ros2_control_plugin', default='uf_robot_hardware/UFRobotSystemHardware')
++    ros2_control_plugin_1 = LaunchConfiguration('ros2_control_plugin_1', default=ros2_control_plugin)
++    ros2_control_plugin_2 = LaunchConfiguration('ros2_control_plugin_2', default=ros2_control_plugin)
+ 
+     baud_checkset = LaunchConfiguration('baud_checkset', default=True)
+     baud_checkset_1 = LaunchConfiguration('baud_checkset', default=baud_checkset)
+diff --git a/xarm_description/urdf/dual_xarm_device.urdf.xacro b/xarm_description/urdf/dual_xarm_device.urdf.xacro
+index 0a19a2c..5d41535 100755
+--- a/xarm_description/urdf/dual_xarm_device.urdf.xacro
++++ b/xarm_description/urdf/dual_xarm_device.urdf.xacro
+@@ -26,7 +26,8 @@
+   <xacro:arg name="report_type_1" default="normal"/>
+   <xacro:arg name="report_type_2" default="normal"/>
+ 
+-  <xacro:arg name="ros2_control_plugin" default="uf_robot_hardware/UFRobotSystemHardware"/>
++  <xacro:arg name="ros2_control_plugin_1" default="uf_robot_hardware/UFRobotSystemHardware"/>
++  <xacro:arg name="ros2_control_plugin_2" default="uf_robot_hardware/UFRobotSystemHardware"/>
+   <xacro:arg name="ros2_control_params" default=""/>
+ 
+   <xacro:arg name="add_realsense_d435i_1" default="false"/>
+@@ -77,7 +78,7 @@
+     effort_control="$(arg effort_control)" velocity_control="$(arg velocity_control)"
+     add_gripper="$(arg add_gripper_1)" add_vacuum_gripper="$(arg add_vacuum_gripper_1)" 
+     add_bio_gripper="$(arg add_bio_gripper_1)" dof="$(arg dof_1)"
+-    ros2_control_plugin="$(arg ros2_control_plugin)" robot_type="$(arg robot_type_1)"
++    ros2_control_plugin="$(arg ros2_control_plugin_1)" robot_type="$(arg robot_type_1)"
+     load_gazebo_plugin="false" ros2_control_params="$(arg ros2_control_params)"
+     attach_to="world" attach_xyz="0 0 0" attach_rpy="0 0 0"
+     add_realsense_d435i="$(arg add_realsense_d435i_1)" 
+@@ -96,7 +97,7 @@
+     effort_control="$(arg effort_control)" velocity_control="$(arg velocity_control)"
+     add_gripper="$(arg add_gripper_2)" add_vacuum_gripper="$(arg add_vacuum_gripper_2)" 
+     add_bio_gripper="$(arg add_bio_gripper_2)" dof="$(arg dof_2)"
+-    ros2_control_plugin="$(arg ros2_control_plugin)" robot_type="$(arg robot_type_2)"
++    ros2_control_plugin="$(arg ros2_control_plugin_2)" robot_type="$(arg robot_type_2)"
+     load_gazebo_plugin="true" ros2_control_params="$(arg ros2_control_params)"
+     attach_to="world" attach_xyz="0 1 0" attach_rpy="0 0 0" create_attach_link="false"
+     add_realsense_d435i="$(arg add_realsense_d435i_2)" 
+diff --git a/xarm_gazebo/launch/_dual_robot_beside_table_gazebo.launch.py b/xarm_gazebo/launch/_dual_robot_beside_table_gazebo.launch.py
+index 76edd9f..5ee4b6e 100644
+--- a/xarm_gazebo/launch/_dual_robot_beside_table_gazebo.launch.py
++++ b/xarm_gazebo/launch/_dual_robot_beside_table_gazebo.launch.py
+@@ -44,6 +44,8 @@ def launch_setup(context, *args, **kwargs):
+     effort_control = LaunchConfiguration('effort_control', default=False)
+     velocity_control = LaunchConfiguration('velocity_control', default=False)
+     ros2_control_plugin = LaunchConfiguration('ros2_control_plugin', default='gazebo_ros2_control/GazeboSystem')
++    ros2_control_plugin_1 = LaunchConfiguration('ros2_control_plugin_1', default=ros2_control_plugin)
++    ros2_control_plugin_2 = LaunchConfiguration('ros2_control_plugin_2', default=ros2_control_plugin)
+     
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_realsense_d435i_1 = LaunchConfiguration('add_realsense_d435i_1', default=add_realsense_d435i)
+@@ -170,7 +172,8 @@ def launch_setup(context, *args, **kwargs):
+                     'limited': limited,
+                     'effort_control': effort_control,
+                     'velocity_control': velocity_control,
+-                    'ros2_control_plugin': ros2_control_plugin,
++                    'ros2_control_plugin_1': ros2_control_plugin_1,
++                    'ros2_control_plugin_2': ros2_control_plugin_2,
+                     'ros2_control_params': ros2_control_params,
+                     'add_realsense_d435i_1': add_realsense_d435i_1,
+                     'add_realsense_d435i_2': add_realsense_d435i_2,
+diff --git a/xarm_gazebo/launch/_dual_robot_beside_table_gz.launch.py b/xarm_gazebo/launch/_dual_robot_beside_table_gz.launch.py
+index 5726fc4..14e7f7f 100644
+--- a/xarm_gazebo/launch/_dual_robot_beside_table_gz.launch.py
++++ b/xarm_gazebo/launch/_dual_robot_beside_table_gz.launch.py
+@@ -44,6 +44,8 @@ def launch_setup(context, *args, **kwargs):
+     effort_control = LaunchConfiguration('effort_control', default=False)
+     velocity_control = LaunchConfiguration('velocity_control', default=False)
+     ros2_control_plugin = LaunchConfiguration('ros2_control_plugin', default='gz_ros2_control/GazeboSimSystem')
++    ros2_control_plugin_1 = LaunchConfiguration('ros2_control_plugin_1', default=ros2_control_plugin)
++    ros2_control_plugin_2 = LaunchConfiguration('ros2_control_plugin_2', default=ros2_control_plugin)
+     
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_realsense_d435i_1 = LaunchConfiguration('add_realsense_d435i_1', default=add_realsense_d435i)
+@@ -170,7 +172,8 @@ def launch_setup(context, *args, **kwargs):
+                     'limited': limited,
+                     'effort_control': effort_control,
+                     'velocity_control': velocity_control,
+-                    'ros2_control_plugin': ros2_control_plugin,
++                    'ros2_control_plugin_1': ros2_control_plugin_1,
++                    'ros2_control_plugin_2': ros2_control_plugin_2,
+                     'ros2_control_params': ros2_control_params,
+                     'add_realsense_d435i_1': add_realsense_d435i_1,
+                     'add_realsense_d435i_2': add_realsense_d435i_2,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py
+index 3676a91..b1e462b 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py
+@@ -43,6 +43,8 @@ def launch_setup(context, *args, **kwargs):
+     velocity_control = LaunchConfiguration('velocity_control', default=False)
+     no_gui_ctrl = LaunchConfiguration('no_gui_ctrl', default=False)
+     ros2_control_plugin = LaunchConfiguration('ros2_control_plugin', default='uf_robot_hardware/UFRobotFakeSystemHardware')
++    ros2_control_plugin_1 = LaunchConfiguration('ros2_control_plugin_1', default=ros2_control_plugin)
++    ros2_control_plugin_2 = LaunchConfiguration('ros2_control_plugin_2', default=ros2_control_plugin)
+     controllers_name = LaunchConfiguration('controllers_name', default='fake_controllers')
+     moveit_controller_manager_key = LaunchConfiguration('moveit_controller_manager_key', default='moveit_fake_controller_manager')
+     moveit_controller_manager_value = LaunchConfiguration('moveit_controller_manager_value', default='moveit_fake_controller_manager/MoveItFakeControllerManager')
+@@ -144,7 +146,8 @@ def launch_setup(context, *args, **kwargs):
+             'limited': limited,
+             'effort_control': effort_control,
+             'velocity_control': velocity_control,
+-            'ros2_control_plugin': ros2_control_plugin,
++            'ros2_control_plugin_1': ros2_control_plugin_1,
++            'ros2_control_plugin_2': ros2_control_plugin_2,
+             'add_realsense_d435i_1': add_realsense_d435i_1,
+             'add_realsense_d435i_2': add_realsense_d435i_2,
+             'add_d435i_links_1': add_d435i_links_1,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py
+index bdb521d..15d8ade 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py
+@@ -99,6 +99,8 @@ def launch_setup(context, *args, **kwargs):
+     ros_namespace = LaunchConfiguration('ros_namespace', default='').perform(context)
+ 
+     ros2_control_plugin = 'uf_robot_hardware/UFRobotFakeSystemHardware'
++    ros2_control_plugin_1 = ros2_control_plugin
++    ros2_control_plugin_2 = ros2_control_plugin
+     controllers_name = 'fake_controllers'
+     xarm_type_1 = '{}{}'.format(robot_type_1.perform(context), dof_1.perform(context) if robot_type_1.perform(context) in ('xarm', 'lite') else '')
+     xarm_type_2 = '{}{}'.format(robot_type_2.perform(context), dof_2.perform(context) if robot_type_2.perform(context) in ('xarm', 'lite') else '')
+@@ -137,7 +139,8 @@ def launch_setup(context, *args, **kwargs):
+         mesh_suffix=mesh_suffix,
+         kinematics_suffix_1=kinematics_suffix_1,
+         kinematics_suffix_2=kinematics_suffix_2,
+-        ros2_control_plugin=ros2_control_plugin,
++        ros2_control_plugin_1=ros2_control_plugin_1,
++        ros2_control_plugin_2=ros2_control_plugin_2,
+         ros2_control_params=ros2_control_params,
+         add_gripper_1=add_gripper_1,
+         add_gripper_2=add_gripper_2,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_gazebo.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_gazebo.launch.py
+index 4c1bce1..b951a27 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_gazebo.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_gazebo.launch.py
+@@ -99,6 +99,8 @@ def launch_setup(context, *args, **kwargs):
+     ros_namespace = LaunchConfiguration('ros_namespace', default='').perform(context)
+ 
+     ros2_control_plugin = 'gazebo_ros2_control/GazeboSystem'
++    ros2_control_plugin_1 = ros2_control_plugin
++    ros2_control_plugin_2 = ros2_control_plugin
+     controllers_name = 'fake_controllers'
+ 
+     ros2_control_params = generate_dual_ros2_control_params_temp_file(
+@@ -136,7 +138,8 @@ def launch_setup(context, *args, **kwargs):
+         mesh_suffix=mesh_suffix,
+         kinematics_suffix_1=kinematics_suffix_1,
+         kinematics_suffix_2=kinematics_suffix_2,
+-        ros2_control_plugin=ros2_control_plugin,
++        ros2_control_plugin_1=ros2_control_plugin_1,
++        ros2_control_plugin_2=ros2_control_plugin_2,
+         ros2_control_params=ros2_control_params,
+         add_gripper_1=add_gripper_1,
+         add_gripper_2=add_gripper_2,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_gz.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_gz.launch.py
+index 550a518..310a637 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_gz.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_gz.launch.py
+@@ -99,6 +99,8 @@ def launch_setup(context, *args, **kwargs):
+     ros_namespace = LaunchConfiguration('ros_namespace', default='').perform(context)
+ 
+     ros2_control_plugin = 'gz_ros2_control/GazeboSimSystem'
++    ros2_control_plugin_1 = ros2_control_plugin
++    ros2_control_plugin_2 = ros2_control_plugin
+     controllers_name = 'fake_controllers'
+ 
+     ros2_control_params = generate_dual_ros2_control_params_temp_file(
+@@ -136,7 +138,8 @@ def launch_setup(context, *args, **kwargs):
+         mesh_suffix=mesh_suffix,
+         kinematics_suffix_1=kinematics_suffix_1,
+         kinematics_suffix_2=kinematics_suffix_2,
+-        ros2_control_plugin=ros2_control_plugin,
++        ros2_control_plugin_1=ros2_control_plugin_1,
++        ros2_control_plugin_2=ros2_control_plugin_2,
+         ros2_control_params=ros2_control_params,
+         add_gripper_1=add_gripper_1,
+         add_gripper_2=add_gripper_2,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py
+index 1e4c924..28e73a4 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py
+@@ -110,6 +110,8 @@ def launch_setup(context, *args, **kwargs):
+     ros_namespace = LaunchConfiguration('ros_namespace', default='').perform(context)
+ 
+     ros2_control_plugin = 'uf_robot_hardware/UFRobotSystemHardware'
++    ros2_control_plugin_1 = ros2_control_plugin
++    ros2_control_plugin_2 = ros2_control_plugin
+     controllers_name = 'controllers'
+     xarm_type_1 = '{}{}'.format(robot_type_1.perform(context), dof_1.perform(context) if robot_type_1.perform(context) in ('xarm', 'lite') else '')
+     xarm_type_2 = '{}{}'.format(robot_type_2.perform(context), dof_2.perform(context) if robot_type_2.perform(context) in ('xarm', 'lite') else '')
+@@ -156,7 +158,8 @@ def launch_setup(context, *args, **kwargs):
+         mesh_suffix=mesh_suffix,
+         kinematics_suffix_1=kinematics_suffix_1,
+         kinematics_suffix_2=kinematics_suffix_2,
+-        ros2_control_plugin=ros2_control_plugin,
++        ros2_control_plugin_1=ros2_control_plugin_1,
++        ros2_control_plugin_2=ros2_control_plugin_2,
+         ros2_control_params=ros2_control_params,
+         add_gripper_1=add_gripper_1,
+         add_gripper_2=add_gripper_2,
+-- 
+2.43.0
+

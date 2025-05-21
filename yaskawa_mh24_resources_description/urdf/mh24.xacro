@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+
+<!--
+    Copyright (C) 2025 Altera Corporation
+    SPDX-License-Identifier: Apache-2.0
+-->
+
+<robot name="motoman_mh_24" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find yaskawa_mh24_resources_description)/urdf/mh24_macro.xacro"/>
+  <xacro:motoman_mh_24 prefix=""/>
+</robot>
+

@@ -31,7 +31,7 @@ A Docker build file is provided for ease of deployment. The resulting Docker ima
 
 Before continuing ensure [Docker is installed](https://docs.docker.com/engine/install/) on your device.
 
-Build the Docker image from the root of this repository with the following command:
+Build the Docker image from the root of this repository with the following command (remove `buildx` from the command if not available):
 
     docker buildx build -f .docker/Dockerfile -t altera-ros2 .
 

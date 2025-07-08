@@ -1,10 +1,5 @@
 <?xml version="1.0"?>
 
-<!--
-    Copyright (C) 2025 Altera Corporation
-    SPDX-License-Identifier: Apache-2.0
--->
-
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>fpga_doc_control_driver</name>

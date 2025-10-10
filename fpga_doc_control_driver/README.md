@@ -40,7 +40,7 @@ If using the hardware interface from a Docker container ensure the Drive-on-Chip
 For example:
 
 ```
-docker run -it --rm --network host --device /dev/uio0 --device /dev/uio1 --device /dev/uio2 altera-ros2:arm64
+docker run -it --rm --network host --device /dev/uio0 --device /dev/uio1 --device /dev/uio2 alterafpga/ros2
 ```
 
 ## Usage

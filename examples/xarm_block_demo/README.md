@@ -13,9 +13,9 @@ A pick & place demo supporting the [UFactory Lite6](https://www.ufactory.cc/lite
 ## Build
 
 ### Docker
-The easiest way to build and run the demo client is using Docker. Follow the instructions [HERE](../../README.md#docker-build) to build a Docker image.
+The easiest way to run the demo client is using the official [Docker image](https://hub.docker.com/r/alterafpga/ros2).
 
-Once built refer to the examples [HERE](../../README.md#docker) to start a suitable container.
+Refer to the usage examples [HERE](../../README.md#docker) to start a suitable container.
 
 ### Native
 Refer to the instructions [HERE](../../README.md#native-build) to build the demo client and required dependencies natively from source.

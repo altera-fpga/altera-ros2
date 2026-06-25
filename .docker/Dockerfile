@@ -9,14 +9,25 @@ ARG OVERLAY_WS=/opt/ros/altera
 FROM $IMAGE
 
 # Install dependencies
-ARG ROS_PKGS="\
-	ros-jazzy-rmw-cyclonedds-cpp \
+ARG ROS_PKGS=" \
+    nano \
+    ros-jazzy-camera-calibration \
+    ros-jazzy-image-proc \
+    ros-jazzy-rqt-image-view \
+    ros-jazzy-rmw-cyclonedds-cpp \
 "
 
 ARG XARM_COMMIT="53d516f66df716259067ad85783b5143fdb4a89b"
 
 ARG OVERLAY_WS
 WORKDIR $OVERLAY_WS
+
+COPY altera_camera/CMakeLists.txt $OVERLAY_WS/altera_camera/
+COPY altera_camera/package.xml $OVERLAY_WS/altera_camera/
+COPY altera_camera/config/*.yaml /root/.ros/camera_info/
+COPY altera_camera/include/altera_camera/*.hpp $OVERLAY_WS/altera_camera/include/altera_camera/
+COPY altera_camera/launch/*.launch.py $OVERLAY_WS/altera_camera/launch/
+COPY altera_camera/src/*.cpp $OVERLAY_WS/altera_camera/src/
 
 COPY yaskawa_mh24_resources_description/CMakeLists.txt $OVERLAY_WS/yaskawa_mh24_resources_description/
 COPY yaskawa_mh24_resources_description/package.xml $OVERLAY_WS/yaskawa_mh24_resources_description/
@@ -45,13 +56,21 @@ COPY examples/moveit_demo_client/src/*.cpp $OVERLAY_WS/moveit_demo_client/src/
 COPY examples/moveit_demo_client/CMakeLists.txt $OVERLAY_WS/moveit_demo_client/
 COPY examples/moveit_demo_client/package.xml $OVERLAY_WS/moveit_demo_client/
 
+COPY examples/xarm_block_camera_demo/config/*.rviz $OVERLAY_WS/xarm_block_camera_demo/config/
+COPY examples/xarm_block_camera_demo/config/*.yaml $OVERLAY_WS/xarm_block_camera_demo/config/
+COPY examples/xarm_block_camera_demo/launch/*.py $OVERLAY_WS/xarm_block_camera_demo/launch/
+COPY examples/xarm_block_camera_demo/include/*.hpp $OVERLAY_WS/xarm_block_camera_demo/include/
+COPY examples/xarm_block_camera_demo/src/*.cpp $OVERLAY_WS/xarm_block_camera_demo/src/
+COPY examples/xarm_block_camera_demo/CMakeLists.txt $OVERLAY_WS/xarm_block_camera_demo/
+COPY examples/xarm_block_camera_demo/package.xml $OVERLAY_WS/xarm_block_camera_demo/
+
 COPY examples/xarm_block_demo/config/*.rviz $OVERLAY_WS/xarm_block_demo/config/
 COPY examples/xarm_block_demo/launch/*.py $OVERLAY_WS/xarm_block_demo/launch/
-COPY examples/xarm_block_demo/src/*.cpp $OVERLAY_WS/xarm_block_demo//src/
+COPY examples/xarm_block_demo/src/*.cpp $OVERLAY_WS/xarm_block_demo/src/
 COPY examples/xarm_block_demo/CMakeLists.txt $OVERLAY_WS/xarm_block_demo/
 COPY examples/xarm_block_demo/package.xml $OVERLAY_WS/xarm_block_demo/
 
-#################  UFACTORY  #################
+## UFACTORY xARM Packages
 RUN git clone https://github.com/xArm-Developer/xarm_ros2.git --recursive -b $ROS_DISTRO
 
 # Patch
@@ -61,6 +80,7 @@ WORKDIR $OVERLAY_WS/xarm_ros2
 RUN git checkout $XARM_COMMIT && git apply *.patch
 
 RUN sed -i '/#include \"hardware_interface\/visibility_control.h\"/d' xarm_controller/include/xarm_controller/hardware/uf_robot_system_hardware.h
+RUN sed -i 's/    update_rate: 150  # Hz/    update_rate: 50/g' xarm_controller/config/lite6_controllers.yaml
 
 # Enable services
 RUN sed -i 's/open_lite6_gripper: false/open_lite6_gripper: true/g' xarm_api/config/xarm_params.yaml
@@ -77,20 +97,36 @@ RUN mv \
     xarm_msgs \
     xarm_sdk \
     ..
-###############################################
 
 WORKDIR $OVERLAY_WS
 
 # Cleanup
 RUN rm -rf xarm_ros2
+###############################################
+
+## ArUco Marker Packages
+RUN git clone https://github.com/namo-robotics/aruco_markers.git -b $ROS_DISTRO aruco_src
+RUN mkdir aruco_markers
+WORKDIR $OVERLAY_WS/aruco_src
+
+RUN mv \
+    aruco_markers \
+    aruco_markers_msgs \
+    ../aruco_markers
+
+WORKDIR $OVERLAY_WS
+
+# Cleanup
+RUN rm -rf aruco_src
+###############################################
 
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     apt update -q && \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends ${ROS_PKGS} && \
     rosdep install -y \
       --from-paths \
         . \
       --ignore-src && \
-    apt install -y --no-install-recommends ${ROS_PKGS} && \
     rm -rf /var/lib/apt/lists/*
 
 # Build overlay source

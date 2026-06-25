@@ -1,18 +1,18 @@
-From 9ac2fbaa1afefe5b08e04cf1992b095a2354d14d Mon Sep 17 00:00:00 2001
-From: Scott Ware <scott.r.ware@intel.com>
+From 6648630641d9520e2d25107ee89c18836ea74b0f Mon Sep 17 00:00:00 2001
+From: Scott Ware <scott.ware@altera.com>
 Date: Thu, 3 Jul 2025 22:15:12 +0100
-Subject: [PATCH 2/2] Fix planning config for dual setups
+Subject: [PATCH 2/3] Fix planning config for dual setups
 
-Signed-off-by: Scott Ware <scott.r.ware@intel.com>
+Signed-off-by: Scott Ware <scott.ware@altera.com>
 ---
  uf_ros_lib/uf_ros_lib/moveit_configs_builder.py | 11 +++++++----
  1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
-index ca61dd2..c056154 100644
+index 3cbedc1..820fbc7 100644
 --- a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
 +++ b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
-@@ -1501,8 +1501,10 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+@@ -1518,8 +1518,10 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
                  planning_yaml_2 = {}
                  if pipeline in pipelines_1:
                      parameter_file = config_folder_1 / filename
@@ -25,7 +25,7 @@ index ca61dd2..c056154 100644
                      if self.__robot_type_1 != 'lite' and self.__add_gripper_1 in ('True', 'true'):
                          parameter_file = self._package_path / 'config' / '{}_gripper'.format(self.__robot_type_1) / filename
                          if parameter_file.exists():
-@@ -1522,8 +1524,9 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+@@ -1539,8 +1541,9 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
  
                  if pipeline in pipelines_2:
                      parameter_file = config_folder_2 / filename

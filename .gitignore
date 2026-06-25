@@ -1,0 +1,6 @@
+build/
+install/
+log/
+.vscode/
+
+devcontainer-lock.json

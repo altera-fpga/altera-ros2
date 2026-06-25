@@ -1,0 +1,26 @@
+image_width: 960
+image_height: 540
+camera_name: altera-real-camera
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [761.22695,   0.     , 490.54462,
+           0.     , 757.83506, 316.3872 ,
+           0.     ,   0.     ,   1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.355588, 0.126413, -0.007003, -0.000106, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [638.48907,   0.     , 494.00451,   0.     ,
+           0.     , 719.63177, 318.06208,   0.     ,
+           0.     ,   0.     ,   1.     ,   0.     ]

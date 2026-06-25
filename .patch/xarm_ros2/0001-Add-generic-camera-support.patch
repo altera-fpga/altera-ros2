@@ -1,0 +1,553 @@
+From 7b7796f874d9a9e6e6130ec06ff63d6582830ad9 Mon Sep 17 00:00:00 2001
+From: Scott Ware <scott.ware@altera.com>
+Date: Wed, 17 Dec 2025 18:12:23 +0000
+Subject: [PATCH 1/3] Add generic camera support
+
+Signed-off-by: Scott Ware <scott.ware@altera.com>
+---
+ .../uf_ros_lib/moveit_configs_builder.py      | 22 ++++++++++++-
+ .../launch/_dual_ros2_control.launch.py       | 12 +++++++
+ .../launch/_robot_ros2_control.launch.py      |  4 +++
+ .../launch/_ros2_control.launch.py            |  4 +++
+ .../lite6_control_rviz_display.launch.py      |  2 ++
+ .../urdf/camera/generic_camera.urdf.xacro     | 31 +++++++++++++++++++
+ .../urdf/dual_xarm_device.urdf.xacro          | 11 ++++++-
+ xarm_description/urdf/xarm_device.urdf.xacro  |  6 +++-
+ xarm_description/urdf/xarm_device_macro.xacro | 11 +++++--
+ .../_dual_robot_moveit_common.launch.py       | 12 +++++++
+ .../launch/_dual_robot_moveit_fake.launch.py  | 10 ++++++
+ .../_dual_robot_moveit_realmove.launch.py     | 10 ++++++
+ .../launch/_robot_moveit_common.launch.py     |  4 +++
+ .../launch/_robot_moveit_fake.launch.py       |  4 +++
+ .../launch/_robot_moveit_ignition.launch.py   |  4 +++
+ .../launch/_robot_moveit_realmove.launch.py   |  4 +++
+ .../launch/_dual_robot_planner.launch.py      | 10 ++++++
+ xarm_planner/launch/_robot_planner.launch.py  |  4 +++
+ 18 files changed, 160 insertions(+), 5 deletions(-)
+ create mode 100644 xarm_description/urdf/camera/generic_camera.urdf.xacro
+
+diff --git a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
+index feed5b2..3cbedc1 100644
+--- a/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
++++ b/uf_ros_lib/uf_ros_lib/moveit_configs_builder.py
+@@ -39,6 +39,8 @@ MoveItConfigsBuilder(
+         ros2_control_plugin='uf_robot_hardware/UFRobotSystemHardware'
+         add_realsense_d435i=False
+         add_d435i_links=True
++        add_generic_camera=False
++        add_camera_links=True
+         model1300=False
+         attach_to='world'
+         attach_xyz='0 0 0'
+@@ -94,6 +96,10 @@ DualMoveItConfigsBuilder(
+         add_realsense_d435i_2=False
+         add_d435i_links_1=True
+         add_d435i_links_2=True
++        add_generic_camera_1=False
++        add_generic_camera_2=False
++        add_camera_links_1=True
++        add_camera_links_2=True
+         add_other_geometry_1=False
+         add_other_geometry_2=False
+         geometry_type_1='box'
+@@ -258,6 +264,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
+         add_bio_gripper = get_param_str('add_bio_gripper', False)
+         add_realsense_d435i = get_param_str('add_realsense_d435i', False)
+         add_d435i_links = get_param_str('add_d435i_links', True)
++        add_generic_camera = get_param_str('add_generic_camera', False)
++        add_camera_links = get_param_str('add_camera_links', True)
+         use_gazebo_camera = get_param_str('use_gazebo_camera', False)
+         add_other_geometry = get_param_str('add_other_geometry', False)
+         geometry_type = get_param_str('geometry_type', 'box')
+@@ -305,6 +313,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
+             'add_bio_gripper': add_bio_gripper,
+             'add_realsense_d435i': add_realsense_d435i,
+             'add_d435i_links': add_d435i_links,
++            'add_generic_camera': add_generic_camera,
++            'add_camera_links': add_camera_links,
+             'use_gazebo_camera': use_gazebo_camera,
+             'add_other_geometry': add_other_geometry,
+             'geometry_type': geometry_type,
+@@ -908,6 +918,12 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+         add_d435i_links = get_param_str('add_d435i_links', True)
+         add_d435i_links_1 = get_param_str('add_d435i_links_1', add_d435i_links)
+         add_d435i_links_2 = get_param_str('add_d435i_links_2', add_d435i_links)
++        add_generic_camera = get_param_str('add_generic_camera', False)
++        add_generic_camera_1 = get_param_str('add_generic_camera_1', add_generic_camera)
++        add_generic_camera_2 = get_param_str('add_generic_camera_2', add_generic_camera)
++        add_camera_links = get_param_str('add_camera_links', True)
++        add_camera_links_1 = get_param_str('add_camera_links_1', add_camera_links)
++        add_camera_links_2 = get_param_str('add_camera_links_2', add_camera_links)
+         add_other_geometry = get_param_str('add_other_geometry', False)
+         add_other_geometry_1 = get_param_str('add_other_geometry_1', add_other_geometry)
+         add_other_geometry_2 = get_param_str('add_other_geometry_2', add_other_geometry)
+@@ -995,6 +1011,10 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+             'add_realsense_d435i_2': add_realsense_d435i_2,
+             'add_d435i_links_1': add_d435i_links_1,
+             'add_d435i_links_2': add_d435i_links_2,
++            'add_generic_camera_1': add_generic_camera_1,
++            'add_generic_camera_2': add_generic_camera_2,
++            'add_camera_links_1': add_camera_links_1,
++            'add_camera_links_2': add_camera_links_2,
+             'add_other_geometry_1': add_other_geometry_1,
+             'add_other_geometry_2': add_other_geometry_2,
+             'geometry_type_1': geometry_type_1,
+@@ -1681,4 +1701,4 @@ class DualMoveItConfigsBuilder(ParameterBuilder):
+         parameters = self._parameters
+         if include_moveit_configs:
+             parameters.update(self.to_moveit_configs().to_dict())
+-        return parameters
+\ No newline at end of file
++        return parameters
+diff --git a/xarm_controller/launch/_dual_ros2_control.launch.py b/xarm_controller/launch/_dual_ros2_control.launch.py
+index 94149ae..5b7c5bc 100644
+--- a/xarm_controller/launch/_dual_ros2_control.launch.py
++++ b/xarm_controller/launch/_dual_ros2_control.launch.py
+@@ -61,6 +61,14 @@ def launch_setup(context, *args, **kwargs):
+     add_d435i_links_1 = LaunchConfiguration('add_d435i_links_1', default=add_d435i_links)
+     add_d435i_links_2 = LaunchConfiguration('add_d435i_links_2', default=add_d435i_links)
+     
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_generic_camera_1 = LaunchConfiguration('add_generic_camera_1', default=add_generic_camera)
++    add_generic_camera_2 = LaunchConfiguration('add_generic_camera_2', default=add_generic_camera)
++    
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
++    add_camera_links_1 = LaunchConfiguration('add_camera_links_1', default=add_camera_links)
++    add_camera_links_2 = LaunchConfiguration('add_camera_links_2', default=add_camera_links)
++    
+     model1300 = LaunchConfiguration('model1300', default=False)
+     model1300_1 = LaunchConfiguration('model1300_1', default=model1300)
+     model1300_2 = LaunchConfiguration('model1300_2', default=model1300)
+@@ -183,6 +191,10 @@ def launch_setup(context, *args, **kwargs):
+                 add_realsense_d435i_2=add_realsense_d435i_2,
+                 add_d435i_links_1=add_d435i_links_1,
+                 add_d435i_links_2=add_d435i_links_2,
++                add_generic_camera_1=add_generic_camera_1,
++                add_generic_camera_2=add_generic_camera_2,
++                add_camera_links_1=add_camera_links_1,
++                add_camera_links_2=add_camera_links_2,
+                 add_other_geometry_1=add_other_geometry_1,
+                 add_other_geometry_2=add_other_geometry_2,
+                 geometry_type_1=geometry_type_1,
+diff --git a/xarm_controller/launch/_robot_ros2_control.launch.py b/xarm_controller/launch/_robot_ros2_control.launch.py
+index 4ce30b9..1f84644 100644
+--- a/xarm_controller/launch/_robot_ros2_control.launch.py
++++ b/xarm_controller/launch/_robot_ros2_control.launch.py
+@@ -39,6 +39,8 @@ def launch_setup(context, *args, **kwargs):
+     
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     model1300 = LaunchConfiguration('model1300', default=False)
+     robot_sn = LaunchConfiguration('robot_sn', default='')
+     attach_to = LaunchConfiguration('attach_to', default='world')
+@@ -90,6 +92,8 @@ def launch_setup(context, *args, **kwargs):
+             add_bio_gripper=add_bio_gripper,
+             add_realsense_d435i=add_realsense_d435i,
+             add_d435i_links=add_d435i_links,
++            add_generic_camera=add_generic_camera,
++            add_camera_links=add_camera_links,
+             add_other_geometry=add_other_geometry,
+             geometry_type=geometry_type,
+             geometry_mass=geometry_mass,
+diff --git a/xarm_controller/launch/_ros2_control.launch.py b/xarm_controller/launch/_ros2_control.launch.py
+index 8794afe..a55a4d1 100644
+--- a/xarm_controller/launch/_ros2_control.launch.py
++++ b/xarm_controller/launch/_ros2_control.launch.py
+@@ -38,6 +38,8 @@ def launch_setup(context, *args, **kwargs):
+ 
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     model1300 = LaunchConfiguration('model1300', default=False)
+     robot_sn = LaunchConfiguration('robot_sn', default='')
+     attach_to = LaunchConfiguration('attach_to', default='world')
+@@ -103,6 +105,8 @@ def launch_setup(context, *args, **kwargs):
+                 add_bio_gripper=add_bio_gripper,
+                 add_realsense_d435i=add_realsense_d435i,
+                 add_d435i_links=add_d435i_links,
++                add_generic_camera=add_generic_camera,
++                add_camera_links=add_camera_links,
+                 add_other_geometry=add_other_geometry,
+                 geometry_type=geometry_type,
+                 geometry_mass=geometry_mass,
+diff --git a/xarm_controller/launch/lite6_control_rviz_display.launch.py b/xarm_controller/launch/lite6_control_rviz_display.launch.py
+index 8d1b824..abde524 100644
+--- a/xarm_controller/launch/lite6_control_rviz_display.launch.py
++++ b/xarm_controller/launch/lite6_control_rviz_display.launch.py
+@@ -26,6 +26,7 @@ def generate_launch_description():
+     add_vacuum_gripper = LaunchConfiguration('add_vacuum_gripper', default=False)
+ 
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
+ 
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     geometry_type = LaunchConfiguration('geometry_type', default='box')
+@@ -57,6 +58,7 @@ def generate_launch_description():
+             'dof': '6',
+             'robot_type': 'lite',
+             'add_realsense_d435i': add_realsense_d435i,
++            'add_generic_camera': add_generic_camera,
+             'add_other_geometry': add_other_geometry,
+             'geometry_type': geometry_type,
+             'geometry_mass': geometry_mass,
+diff --git a/xarm_description/urdf/camera/generic_camera.urdf.xacro b/xarm_description/urdf/camera/generic_camera.urdf.xacro
+new file mode 100644
+index 0000000..8d646de
+--- /dev/null
++++ b/xarm_description/urdf/camera/generic_camera.urdf.xacro
+@@ -0,0 +1,31 @@
++<?xml version="1.0"?>
++<robot xmlns:xacro="http://ros.org/wiki/xacro">
++  <xacro:macro name="camera_urdf" params="prefix:='' add_camera_links:=false">
++
++    <!-- define property -->
++    <xacro:property name="M_PI" value="3.1415926535897931" />
++    
++    <link name="${prefix}link_eef"><xacro:common_link_visual mesh_filename="camera/realsense/visual/d435_with_cam_stand" origin_xyz="0 0 0" origin_rpy="0 0 0" material_name="${prefix}Silver" /><xacro:common_link_collision mesh_filename="camera/realsense/collision/d435_with_cam_stand" origin_xyz="0 0 0" origin_rpy="0 0 0" /></link>
++
++    <xacro:if value="${add_camera_links}">
++
++      <link name="${prefix}xarm_camera_link"></link>
++
++      <link name="${prefix}xarm_camera_color_optical_frame"></link>
++
++      <joint name="${prefix}xarm_camera_link_joint" type="fixed">
++        <parent link="${prefix}link_eef" />
++        <child link="${prefix}xarm_camera_link" />
++        <origin xyz="0.06746 0.00 0.00" rpy="${M_PI} ${-M_PI/2} 0" />
++      </joint>
++
++      <joint name="${prefix}xarm_camera_color_optical_joint" type="fixed">
++        <parent link="${prefix}xarm_camera_link" />
++        <child link="${prefix}xarm_camera_color_optical_frame" />
++        <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
++      </joint>
++
++    </xacro:if>
++
++  </xacro:macro>
++</robot>
+diff --git a/xarm_description/urdf/dual_xarm_device.urdf.xacro b/xarm_description/urdf/dual_xarm_device.urdf.xacro
+index 0a19a2c..807f2de 100755
+--- a/xarm_description/urdf/dual_xarm_device.urdf.xacro
++++ b/xarm_description/urdf/dual_xarm_device.urdf.xacro
+@@ -33,6 +33,11 @@
+   <xacro:arg name="add_realsense_d435i_2" default="false"/>
+   <xacro:arg name="add_d435i_links_1" default="true"/>
+   <xacro:arg name="add_d435i_links_2" default="true"/>
++  
++  <xacro:arg name="add_generic_camera_1" default="false"/>
++  <xacro:arg name="add_generic_camera_2" default="false"/>
++  <xacro:arg name="add_camera_links_1" default="true"/>
++  <xacro:arg name="add_camera_links_2" default="true"/>
+ 
+   <xacro:arg name="add_other_geometry_1" default="false"/>
+   <xacro:arg name="geometry_type_1" default="box"/>
+@@ -82,6 +87,8 @@
+     attach_to="world" attach_xyz="0 0 0" attach_rpy="0 0 0"
+     add_realsense_d435i="$(arg add_realsense_d435i_1)" 
+     add_d435i_links="$(arg add_d435i_links_1)" 
++    add_generic_camera="$(arg add_generic_camera_1)"
++    add_camera_links="$(arg add_camera_links_1)"
+     add_other_geometry="$(arg add_other_geometry_1)" 
+     geometry_type="$(arg geometry_type_1)" geometry_mass="$(arg geometry_mass_1)"
+     geometry_height="$(arg geometry_height_1)" geometry_radius="$(arg geometry_radius_1)"
+@@ -100,7 +107,9 @@
+     load_gazebo_plugin="true" ros2_control_params="$(arg ros2_control_params)"
+     attach_to="world" attach_xyz="0 1 0" attach_rpy="0 0 0" create_attach_link="false"
+     add_realsense_d435i="$(arg add_realsense_d435i_2)" 
+-    add_d435i_links="$(arg add_d435i_links_2)" 
++    add_d435i_links="$(arg add_d435i_links_2)"
++    add_generic_camera="$(arg add_generic_camera_2)"
++    add_camera_links="$(arg add_camera_links_2)"
+     add_other_geometry="$(arg add_other_geometry_2)" 
+     geometry_type="$(arg geometry_type_2)" geometry_mass="$(arg geometry_mass_2)"
+     geometry_height="$(arg geometry_height_2)" geometry_radius="$(arg geometry_radius_2)"
+diff --git a/xarm_description/urdf/xarm_device.urdf.xacro b/xarm_description/urdf/xarm_device.urdf.xacro
+index cd49f7f..f1d0af3 100755
+--- a/xarm_description/urdf/xarm_device.urdf.xacro
++++ b/xarm_description/urdf/xarm_device.urdf.xacro
+@@ -21,6 +21,8 @@
+ 
+   <xacro:arg name="add_realsense_d435i" default="false"/>
+   <xacro:arg name="add_d435i_links" default="true"/>
++  <xacro:arg name="add_generic_camera" default="false"/>
++  <xacro:arg name="add_camera_links" default="true"/>
+   <xacro:arg name="use_gazebo_camera" default="false"/>
+ 
+   <xacro:arg name="add_other_geometry" default="false"/>
+@@ -55,7 +57,9 @@
+     ros2_control_plugin="$(arg ros2_control_plugin)" robot_type="$(arg robot_type)" 
+     load_gazebo_plugin="true" ros2_control_params="$(arg ros2_control_params)"
+     add_realsense_d435i="$(arg add_realsense_d435i)" 
+-    add_d435i_links="$(arg add_d435i_links)" 
++    add_d435i_links="$(arg add_d435i_links)"
++    add_generic_camera="$(arg add_generic_camera)"
++    add_camera_links="$(arg add_camera_links)"
+     add_other_geometry="$(arg add_other_geometry)" 
+     geometry_type="$(arg geometry_type)" geometry_mass="$(arg geometry_mass)"
+     geometry_height="$(arg geometry_height)" geometry_radius="$(arg geometry_radius)"
+diff --git a/xarm_description/urdf/xarm_device_macro.xacro b/xarm_description/urdf/xarm_device_macro.xacro
+index 5ef9329..f2e566d 100644
+--- a/xarm_description/urdf/xarm_device_macro.xacro
++++ b/xarm_description/urdf/xarm_device_macro.xacro
+@@ -20,6 +20,8 @@
+     load_gazebo_plugin:=false 
+     add_realsense_d435i:=false
+     add_d435i_links:=true
++    add_generic_camera:=false
++    add_camera_links:=true
+     use_gazebo_camera:=false
+     add_other_geometry:=false 
+     geometry_type:='box'
+@@ -220,7 +222,12 @@
+         <xacro:realsense_gazebo prefix="${prefix}" />
+       </xacro:if>
+     </xacro:if>
+-    <xacro:unless value="${add_realsense_d435i}">
++    <xacro:if value="${add_generic_camera}">
++      <!-- (xarm) Load generic camera URDF -->
++      <xacro:include filename="$(find xarm_description)/urdf/camera/generic_camera.urdf.xacro" />
++      <xacro:camera_urdf prefix="${prefix}" add_camera_links="${add_camera_links}" />
++    </xacro:if>
++    <xacro:unless value="${add_realsense_d435i or add_generic_camera}">
+       <link name="${prefix}link_eef"/>
+     </xacro:unless>
+     <joint name="${prefix}joint_eef" type="fixed">
+@@ -314,4 +321,4 @@
+     <xacro:device_macro_end />
+ 
+   </xacro:macro>
+-</robot>
+\ No newline at end of file
++</robot>
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py
+index 3676a91..f83aeb4 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_common.launch.py
+@@ -55,6 +55,14 @@ def launch_setup(context, *args, **kwargs):
+     add_d435i_links_1 = LaunchConfiguration('add_d435i_links_1', default=add_d435i_links)
+     add_d435i_links_2 = LaunchConfiguration('add_d435i_links_2', default=add_d435i_links)
+     
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_generic_camera_1 = LaunchConfiguration('add_generic_camera_1', default=add_generic_camera)
++    add_generic_camera_2 = LaunchConfiguration('add_generic_camera_2', default=add_generic_camera)
++    
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
++    add_camera_links_1 = LaunchConfiguration('add_camera_links_1', default=add_camera_links)
++    add_camera_links_2 = LaunchConfiguration('add_camera_links_2', default=add_camera_links)
++    
+     model1300 = LaunchConfiguration('model1300', default=False)
+     model1300_1 = LaunchConfiguration('model1300_1', default=model1300)
+     model1300_2 = LaunchConfiguration('model1300_2', default=model1300)
+@@ -149,6 +157,10 @@ def launch_setup(context, *args, **kwargs):
+             'add_realsense_d435i_2': add_realsense_d435i_2,
+             'add_d435i_links_1': add_d435i_links_1,
+             'add_d435i_links_2': add_d435i_links_2,
++            'add_generic_camera_1': add_generic_camera_1,
++            'add_generic_camera_2': add_generic_camera_2,
++            'add_camera_links_1': add_camera_links_1,
++            'add_camera_links_2': add_camera_links_2,
+             'model1300_1': model1300_1,
+             'model1300_2': model1300_2,
+             'robot_sn_1': robot_sn_1,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py
+index bdb521d..da1e8b5 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_fake.launch.py
+@@ -58,6 +58,12 @@ def launch_setup(context, *args, **kwargs):
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
+     add_d435i_links_1 = LaunchConfiguration('add_d435i_links_1', default=add_d435i_links)
+     add_d435i_links_2 = LaunchConfiguration('add_d435i_links_2', default=add_d435i_links)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_generic_camera_1 = LaunchConfiguration('add_generic_camera_1', default=add_generic_camera)
++    add_generic_camera_2 = LaunchConfiguration('add_generic_camera_2', default=add_generic_camera)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
++    add_camera_links_1 = LaunchConfiguration('add_camera_links_1', default=add_camera_links)
++    add_camera_links_2 = LaunchConfiguration('add_camera_links_2', default=add_camera_links)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     add_other_geometry_1 = LaunchConfiguration('add_other_geometry_1', default=add_other_geometry)
+     add_other_geometry_2 = LaunchConfiguration('add_other_geometry_2', default=add_other_geometry)
+@@ -149,6 +155,10 @@ def launch_setup(context, *args, **kwargs):
+         add_realsense_d435i_2=add_realsense_d435i_2,
+         add_d435i_links_1=add_d435i_links_1,
+         add_d435i_links_2=add_d435i_links_2,
++        add_generic_camera_1=add_generic_camera_1,
++        add_generic_camera_2=add_generic_camera_2,
++        add_camera_links_1=add_camera_links_1,
++        add_camera_links_2=add_camera_links_2,
+         add_other_geometry_1=add_other_geometry_1,
+         add_other_geometry_2=add_other_geometry_2,
+         geometry_type_1=geometry_type_1,
+diff --git a/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py b/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py
+index 0fa0dd0..5edf065 100644
+--- a/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py
++++ b/xarm_moveit_config/launch/_dual_robot_moveit_realmove.launch.py
+@@ -69,6 +69,12 @@ def launch_setup(context, *args, **kwargs):
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
+     add_d435i_links_1 = LaunchConfiguration('add_d435i_links_1', default=add_d435i_links)
+     add_d435i_links_2 = LaunchConfiguration('add_d435i_links_2', default=add_d435i_links)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_generic_camera_1 = LaunchConfiguration('add_generic_camera_1', default=add_generic_camera)
++    add_generic_camera_2 = LaunchConfiguration('add_generic_camera_2', default=add_generic_camera)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
++    add_camera_links_1 = LaunchConfiguration('add_camera_links_1', default=add_camera_links)
++    add_camera_links_2 = LaunchConfiguration('add_camera_links_2', default=add_camera_links)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     add_other_geometry_1 = LaunchConfiguration('add_other_geometry_1', default=add_other_geometry)
+     add_other_geometry_2 = LaunchConfiguration('add_other_geometry_2', default=add_other_geometry)
+@@ -169,6 +175,10 @@ def launch_setup(context, *args, **kwargs):
+         add_realsense_d435i_2=add_realsense_d435i_2,
+         add_d435i_links_1=add_d435i_links_1,
+         add_d435i_links_2=add_d435i_links_2,
++        add_generic_camera_1=add_generic_camera_1,
++        add_generic_camera_2=add_generic_camera_2,
++        add_camera_links_1=add_camera_links_1,
++        add_camera_links_2=add_camera_links_2,
+         add_other_geometry_1=add_other_geometry_1,
+         add_other_geometry_2=add_other_geometry_2,
+         geometry_type_1=geometry_type_1,
+diff --git a/xarm_moveit_config/launch/_robot_moveit_common.launch.py b/xarm_moveit_config/launch/_robot_moveit_common.launch.py
+index b4033c8..27d16eb 100644
+--- a/xarm_moveit_config/launch/_robot_moveit_common.launch.py
++++ b/xarm_moveit_config/launch/_robot_moveit_common.launch.py
+@@ -38,6 +38,8 @@ def launch_setup(context, *args, **kwargs):
+ 
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     model1300 = LaunchConfiguration('model1300', default=False)
+ 
+     attach_to = LaunchConfiguration('attach_to', default='world')
+@@ -85,6 +87,8 @@ def launch_setup(context, *args, **kwargs):
+             'ros2_control_plugin': ros2_control_plugin,
+             'add_realsense_d435i': add_realsense_d435i,
+             'add_d435i_links': add_d435i_links,
++            'add_generic_camera': add_generic_camera,
++            'add_camera_links': add_camera_links,
+             'model1300': model1300,
+             'attach_to': attach_to,
+             'attach_xyz': attach_xyz,
+diff --git a/xarm_moveit_config/launch/_robot_moveit_fake.launch.py b/xarm_moveit_config/launch/_robot_moveit_fake.launch.py
+index 8782ff2..532363e 100644
+--- a/xarm_moveit_config/launch/_robot_moveit_fake.launch.py
++++ b/xarm_moveit_config/launch/_robot_moveit_fake.launch.py
+@@ -40,6 +40,8 @@ def launch_setup(context, *args, **kwargs):
+     add_bio_gripper = LaunchConfiguration('add_bio_gripper', default=False)
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     geometry_type = LaunchConfiguration('geometry_type', default='box')
+     geometry_mass = LaunchConfiguration('geometry_mass', default=0.1)
+@@ -93,6 +95,8 @@ def launch_setup(context, *args, **kwargs):
+         add_bio_gripper=add_bio_gripper,
+         add_realsense_d435i=add_realsense_d435i,
+         add_d435i_links=add_d435i_links,
++        add_generic_camera=add_generic_camera,
++        add_camera_links=add_camera_links,
+         add_other_geometry=add_other_geometry,
+         geometry_type=geometry_type,
+         geometry_mass=geometry_mass,
+diff --git a/xarm_moveit_config/launch/_robot_moveit_ignition.launch.py b/xarm_moveit_config/launch/_robot_moveit_ignition.launch.py
+index 639dbe5..b4b0b58 100644
+--- a/xarm_moveit_config/launch/_robot_moveit_ignition.launch.py
++++ b/xarm_moveit_config/launch/_robot_moveit_ignition.launch.py
+@@ -39,6 +39,8 @@ def launch_setup(context, *args, **kwargs):
+     add_bio_gripper = LaunchConfiguration('add_bio_gripper', default=False)
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     geometry_type = LaunchConfiguration('geometry_type', default='box')
+     geometry_mass = LaunchConfiguration('geometry_mass', default=0.1)
+@@ -93,6 +95,8 @@ def launch_setup(context, *args, **kwargs):
+         add_bio_gripper=add_bio_gripper,
+         add_realsense_d435i=add_realsense_d435i,
+         add_d435i_links=add_d435i_links,
++        add_generic_camera=add_generic_camera,
++        add_camera_links=add_camera_links,
+         add_other_geometry=add_other_geometry,
+         geometry_type=geometry_type,
+         geometry_mass=geometry_mass,
+diff --git a/xarm_moveit_config/launch/_robot_moveit_realmove.launch.py b/xarm_moveit_config/launch/_robot_moveit_realmove.launch.py
+index 120a366..23feb37 100644
+--- a/xarm_moveit_config/launch/_robot_moveit_realmove.launch.py
++++ b/xarm_moveit_config/launch/_robot_moveit_realmove.launch.py
+@@ -45,6 +45,8 @@ def launch_setup(context, *args, **kwargs):
+     add_bio_gripper = LaunchConfiguration('add_bio_gripper', default=False)
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     geometry_type = LaunchConfiguration('geometry_type', default='box')
+     geometry_mass = LaunchConfiguration('geometry_mass', default=0.1)
+@@ -102,6 +104,8 @@ def launch_setup(context, *args, **kwargs):
+         add_bio_gripper=add_bio_gripper,
+         add_realsense_d435i=add_realsense_d435i,
+         add_d435i_links=add_d435i_links,
++        add_generic_camera=add_generic_camera,
++        add_camera_links=add_camera_links,
+         add_other_geometry=add_other_geometry,
+         geometry_type=geometry_type,
+         geometry_mass=geometry_mass,
+diff --git a/xarm_planner/launch/_dual_robot_planner.launch.py b/xarm_planner/launch/_dual_robot_planner.launch.py
+index b096b7c..f31ef02 100644
+--- a/xarm_planner/launch/_dual_robot_planner.launch.py
++++ b/xarm_planner/launch/_dual_robot_planner.launch.py
+@@ -54,6 +54,12 @@ def launch_setup(context, *args, **kwargs):
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
+     add_d435i_links_1 = LaunchConfiguration('add_d435i_links_1', default=add_d435i_links)
+     add_d435i_links_2 = LaunchConfiguration('add_d435i_links_2', default=add_d435i_links)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_generic_camera_1 = LaunchConfiguration('add_generic_camera_1', default=add_generic_camera)
++    add_generic_camera_2 = LaunchConfiguration('add_generic_camera_2', default=add_generic_camera)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
++    add_camera_links_1 = LaunchConfiguration('add_camera_links_1', default=add_camera_links)
++    add_camera_links_2 = LaunchConfiguration('add_camera_links_2', default=add_camera_links)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     add_other_geometry_1 = LaunchConfiguration('add_other_geometry_1', default=add_other_geometry)
+     add_other_geometry_2 = LaunchConfiguration('add_other_geometry_2', default=add_other_geometry)
+@@ -128,6 +134,10 @@ def launch_setup(context, *args, **kwargs):
+             add_realsense_d435i_2=add_realsense_d435i_2,
+             add_d435i_links_1=add_d435i_links_1,
+             add_d435i_links_2=add_d435i_links_2,
++            add_generic_camera_1=add_generic_camera_1,
++            add_generic_camera_2=add_generic_camera_2,
++            add_camera_links_1=add_camera_links_1,
++            add_camera_links_2=add_camera_links_2,
+             add_other_geometry_1=add_other_geometry_1,
+             add_other_geometry_2=add_other_geometry_2,
+             geometry_type_1=geometry_type_1,
+diff --git a/xarm_planner/launch/_robot_planner.launch.py b/xarm_planner/launch/_robot_planner.launch.py
+index ae72074..6234a07 100644
+--- a/xarm_planner/launch/_robot_planner.launch.py
++++ b/xarm_planner/launch/_robot_planner.launch.py
+@@ -36,6 +36,8 @@ def launch_setup(context, *args, **kwargs):
+     add_bio_gripper = LaunchConfiguration('add_bio_gripper', default=False)
+     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
+     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
++    add_generic_camera = LaunchConfiguration('add_generic_camera', default=False)
++    add_camera_links = LaunchConfiguration('add_camera_links', default=True)
+     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
+     geometry_type = LaunchConfiguration('geometry_type', default='box')
+     geometry_mass = LaunchConfiguration('geometry_mass', default=0.1)
+@@ -78,6 +80,8 @@ def launch_setup(context, *args, **kwargs):
+             add_bio_gripper=add_bio_gripper,
+             add_realsense_d435i=add_realsense_d435i,
+             add_d435i_links=add_d435i_links,
++            add_generic_camera=add_generic_camera,
++            add_camera_links=add_camera_links,
+             add_other_geometry=add_other_geometry,
+             geometry_type=geometry_type,
+             geometry_mass=geometry_mass,
+-- 
+2.43.0
+

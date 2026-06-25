@@ -1,0 +1,45 @@
+{
+	"name": "altera-ros2-dev",
+	"image": "ros:jazzy-ros-base",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+	"containerEnv": {
+		"ROS_DISTRO": "jazzy",
+		"ROS_LOCALHOST_ONLY": "0",
+		"RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp",
+		"APT_PKGS": "python3-pip ros-jazzy-rmw-cyclonedds-cpp",
+		"PYTHON_PKGS": "statick",
+		"DEBIAN_FRONTEND": "noninteractive",
+		"PIP_BREAK_SYSTEM_PACKAGES": "1"
+	},
+	"runArgs": [
+		"--network=host",
+		"--ipc=host",
+		"--cap-add=SYS_PTRACE",
+		"--security-opt",
+		"seccomp=unconfined"
+	],
+	"mounts": [
+		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
+	],
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"upgradePackages": true,
+			"installZsh": false
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-python.python",
+				"ms-azuretools.vscode-docker"
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash"
+			}
+		}
+	},
+	"postCreateCommand": "bash -lc 'apt-get update && apt install -y --no-install-recommends ${APT_PKGS} && rosdep install --from-paths . --ignore-src -r -y && python3 -m pip install ${PYTHON_PKGS} && echo \"source /opt/ros/$ROS_DISTRO/setup.bash\" >> /root/.bashrc'",
+	"postStartCommand": "bash -lc 'source /opt/ros/$ROS_DISTRO/setup.bash'"
+}

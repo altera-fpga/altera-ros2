@@ -1,11 +1,14 @@
-# Altera ROS 2 Packages
+# Altera® ROS 2 Packages
 
-A collection of ROS 2 packages to support Altera FPGA products.
+A collection of ROS 2 packages to support Altera® FPGA products.
 
 # Packages
 
+## [Altera® Camera](altera_camera/README.md)
+ROS camera driver which interfaces with [Altera® Video Frame Writer IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/about-the-video-buffer-writer-ip).
+
 ## [FPGA Drive-on-Chip Control Driver](fpga_doc_control_driver/README.md)
-[ROS Control](https://control.ros.org/rolling/index.html) hardware interface for [Altera Drive-on-Chip](https://github.com/altera-fpga/agilex-ed-drive-on-chip).
+[ROS Control](https://control.ros.org/rolling/index.html) hardware interface for [Altera® Drive-on-Chip](https://github.com/altera-fpga/agilex-ed-drive-on-chip).
 
 ## [Yaskawa MH24 MoveIt Config](yaskawa_mh24_moveit_config/README.md)
 Configuration for controlling Yaskawa Motoman MH24 (simulated) robot arm with MoveIt 2.
@@ -20,6 +23,9 @@ A [MoveIt2](https://moveit.picknik.ai/main/index.html) C++ client which can plan
 
 ## [xArm Block Demo](examples/xarm_block_demo/README.md)
 A pick & place demo supporting the [UFactory Lite6](https://www.ufactory.cc/lite-6-collaborative-robot/) robot arm. The demo utilizes [MoveIt2](https://moveit.picknik.ai/main/index.html) to create patterns with blocks.
+
+## [xArm Block Camera Demo](examples/xarm_block_camera_demo/README.md)
+A camera based pick & place demo supporting the [UFactory Lite6](https://www.ufactory.cc/lite-6-collaborative-robot/) robot arm. The demo utilizes [ArUco marker detection](https://github.com/namo-robotics/aruco_markers) and [MoveIt2](https://moveit.picknik.ai/main/index.html) to detect, pick and place blocks.
 
 # Usage
 
@@ -60,7 +66,6 @@ rocker --x11 --devices /dev/dri --network host alterafpga/ros2
 
 # Building
 
-## Docker Build
 Before continuing ensure [Docker is installed](https://docs.docker.com/engine/install/) on your device.
 
 Build the Docker image from the root of this repository with the following command (remove `buildx` from the command if not available):
@@ -72,41 +77,3 @@ To [cross-compile](https://docs.docker.com/build/building/multi-platform/) for a
     docker run --privileged --rm tonistiigi/binfmt --install all
     
     docker buildx build -f .docker/Dockerfile -t alterafpga/ros2 --platform linux/arm64 .
-
-## Native Build
-To build the packages natively please ensure the correct version of [ROS 2 is installed](https://docs.ros.org/en/rolling/Installation.html) on your device based on the branch of this repository you have checked out.
-
-1. Create a workspace directory if you don't yet have one
-
-```
-mkdir -p $HOME/ros_ws/src
-cd $HOME/ros_ws/src
-```
-
-2a. Clone this repository into `$HOME/ros_ws/src`
-
-2b. (Optional) Clone the [xArm ROS 2 repository](https://github.com/xArm-Developer/xarm_ros2) into your source directory if you need need UFACTORY Lite 6 support
-
-```
-git clone https://github.com/xArm-Developer/xarm_ros2.git --recursive -b $ROS_DISTRO
-```
-
-3. Install dependencies
-
-```
-rosdep update
-rosdep install -y \
-    --from-paths . \
-    --ignore-src
-```
-
-4. Build packages
-```
-cd $HOME/ros_ws
-colcon build
-```
-
-4. Source the environment setup script
-```
-source install/setup.bash
-```

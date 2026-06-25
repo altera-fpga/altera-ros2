@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>xarm_block_camera_demo</name>
+  <version>0.1.0</version>
+  <description>MoveIt visual pick and place demo client</description>
+  <maintainer email="scott.ware@altera.com">Scott Ware</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  
+  <depend>aruco_markers</depend>
+  <depend>aruco_markers_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <depend>xarm_api</depend>
+  <depend>xarm_msgs</depend>
+  <depend>xarm_description</depend>
+  <depend>xarm_moveit_config</depend>
+
+  <build_depend>moveit_ros_planning</build_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>moveit_planners</exec_depend>
+  <exec_depend>moveit_planners_ompl</exec_depend>
+  <exec_depend>moveit_simple_controller_manager</exec_depend>
+  <exec_depend>uf_ros_lib</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
